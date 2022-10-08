@@ -25,7 +25,9 @@ For this example we'll make use of a dataset found in the PROMISE repository don
 Data, script, etc. are found at the GitHub repository.^[https://github.com/torkar/icse_tutorial]
 
 ```{r}
-f <- read.arff("data/nasa93_subset.arff")
+setwd("~/SENG480B")
+f <- read.arff("data/nasa93.arff")
+summary(f)
 ```
 
 So, from the top, we have `Effort`, our outcome, and then `Language`, our predictor. `Effort` is in hours spent. `Language` we've converted to an integer $1,2,3$, indicating three different languages. In total we have `r nrow(f)` rows (or observations, if you will).
