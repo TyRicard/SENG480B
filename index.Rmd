@@ -37,13 +37,15 @@ For this example we'll make use of a dataset found in the PROMISE repository don
 Data, script, etc. are found at the GitHub repository.^[https://github.com/torkar/icse_tutorial]
 
 ```{r}
-setwd("~/SENG480B")
-f <- read.arff("data/nasa93.arff")
-
+f <- read.arff("data/desharnais.arff")
+ 
 # remove columns we don't need
-f <- f[c(3,6,10,15,17,24)]
+f <- f[-c(1:5,7:11)]
 
-summary(f)
+# convert Language (factor) to numeric
+f$Language <- as.numeric(f$Language)
+
+str(f)
 ```
 
 So, from the top, we have `Effort`, our outcome, and then `Language`, our predictor. `Effort` is in hours spent. `Language` we've converted to an integer $1,2,3$, indicating three different languages. In total we have `r nrow(f)` rows (or observations, if you will).
@@ -66,7 +68,7 @@ Without looking at the empirical data we can assume that we perhaps have a mean 
 
 ```{r}
 # sample randomly from a log-normal()
-max(rlnorm(1e5, 0, 2))
+max(rlnorm(1e5, 0, 4))
 ```
 
 which seems OK. Let's have a look at a default prior,
@@ -88,7 +90,7 @@ Sample the model with empirical data. We sample using four independent chains, w
 ```{r m0, message=FALSE, warning=FALSE, results='hide'}
 m0 <- ulam(
   alist(
-    Effort ~ normal(lambda),
+    Effort ~ poisson(lambda),
     log(lambda) <- alpha, # log link
     alpha ~ normal(0, 3)
   ), data = f, cores = 4, chains = 4, cmdstan = TRUE, log_lik = TRUE, iter = 5e3
