@@ -22,6 +22,7 @@ set.seed(100)
 setwd("~/SENG480B")
 f <- read.arff("data/nasa93.arff")
 f <- f[c(3, 6, 10, 15, 17, 24)]
+f$cplx <- as.numeric(f$cplx)
 summary(f)
 ```
 
@@ -40,26 +41,48 @@ m0 <- ulam(
 )
 ```
 
-
 ```{r}
 precis(m0)
+trankplot(m0)
+plot(precis(m0, depth = 2, prob = 0.95))
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide', fig.align='center'}
-trankplot(m0)
+```{r m1, message=FALSE, warning=FALSE, results='hide'}
+m1 <- ulam(
+  alist(
+    act_effort ~ dlnorm(alpha, 1),
+    alpha ~ normal(0, 2.2)
+  ), data = f, cores = 4, chains = 4, cmdstan = TRUE, log_lik = TRUE, iter = 5e3
+)
 ```
 
 ```{r}
-plot(precis(m0, depth = 2, prob = 0.95))
+precis(m1)
+trankplot(m1)
+plot(precis(m1, depth = 2, prob = 0.95))
+```
+
+```{r m2,message=FALSE, warning=FALSE, results='hide'}
+m2<- ulam(
+    alist(
+        act_effort ~ dlnorm(alpha, sigma),
+        alpha <- a_cplx[cplx],
+        a_cplx[cplx] ~ normal(4,1),
+        sigma ~ dexp(1)
+    ), data = f, cores = 4, chains = 4, cmdstan = TRUE, log_lik = TRUE
+)
 ```
 
 ```{r}
 var(f$act_effort)
 mean(f$act_effort)
+median(f$act_effort)
 ```
 
 ```{r loo, warning=FALSE, message=FALSE, fig.align='center'}
+(loo_est <- compare(m0, m1, func=LOO))
 (loo_est <- compare(m0, m1, m2, func=LOO))
+(loo_est <- compare(m0, m1, m2, m3, func=LOO))
 ```
 
 ```{r}
